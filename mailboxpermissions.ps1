@@ -20,7 +20,7 @@ Add-Type -AssemblyName System.Windows.Forms
 #Signing on to O365 using the Admin Credentials for O365
 $O365_Credentials  = Get-Credential 
 # Importing necessary modules
-$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "https://outlook.office365.com/powershell-liveid" -Credential $O365_Credentials -Authentication Basic –AllowRedirection         
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "https://outlook.office365.com/powershell-liveid" -Credential $O365_Credentials -Authentication Basic -AllowRedirection         
 Import-PSSession $Session
 
 
@@ -122,7 +122,7 @@ if ($result -eq "Cancel") {
   if ($result -eq "Ok")
     {Write-Host "OK selected - proceeding with adding permissions"}
 else {exit}
-
+<##>
 ## form checking before submission
 if($fullAccess.CheckState -eq "Unchecked" -and $SendOnBehalf.CheckState -eq "Unchecked" -and $SendAsRights.CheckState -eq "Unchecked") {
   [System.Windows.MessageBox]::Show('No rights selected')
@@ -144,29 +144,27 @@ write-host "fullaccess state: $($fullAccess.CheckState)"
 write-host "send on behalf state: $($SendOnBehalf.CheckState)"
 write-host "send as state: $($SendAsRights.CheckState)"
 
+## Changes below
 if ($fullaccess.CheckState -eq "Checked") {
   write-host "Fullaccess checked!"
   foreach($p in $users.SelectedItems){
     Add-MailboxPermission -identity "$($mailboxes.SelectedItem)" -User "$($p)" -AccessRights fullaccess -Verbose
     write-host "$($p) is now given full access to $($mailboxes.SelectedItem) mailbox!"
-    Get-MailboxPermission -identity "$($mailboxes.SelectedItem)"
   }
+  Get-MailboxPermission -identity "$($mailboxes.SelectedItem)"
 }
 if ($SendAsRights.CheckState -eq "Checked") {
   Write-Host "Send as status checked!"
   foreach($u in $users.SelectedItems) {
     Add-RecipientPermission -Identity "$($mailboxes.SelectedItems)" -Trustee "$($u)" -AccessRights sendas -Confirm:$false -Verbose
-    write-host "$($u) has been given send as rights for $($mailboxes.SelectedItem)"
-    Get-RecipientPermission -identity "$($mailboxes.SelectedItem)"
+    write-host "$($u) has been given send as rights for $($mailboxes.SelectedItem)" 
   }
+  Get-RecipientPermission -identity "$($mailboxes.SelectedItem)"
 }
 if ($SendOnBehalf.CheckState -eq "Checked") {
   Write-Host "Send on behalf selected!"
-  foreach($q in $users.SelectedItems){
+  foreach($q in $users.SelectedItems) {
     Set-Mailbox -identity "$($mailboxes.SelectedItem)" -GrantSendOnBehalfTo "$($q)" -Verbose
-    write-host "$($q) has been given send on behalf rights to $($mailboxes.SelectedItem)"
+    write-host "$($q) has been given send on behalf rights to $($mailboxes.SelectedItem)."
   }
 }
-Write-Host "Wrapping up"
-Stop-Transcript
-Remove-PSSession $Session
